@@ -17,10 +17,41 @@ class Back(object):
         db.commit()
         db.close()
 
+    def del_from_db(self, id):
+        db = sqlite3.connect("movies.db")
+        cur = db.cursor()
+        cur.execute("delete from movies where id=?", (id, ))
+        db.commit()
+        db.close()
+
+    def update_db(self, title="", year=2000, director="", lead="", id=0):
+        db = sqlite3.connect("movies.db")
+        cur = db.cursor()
+        cur.execute("update movies set title=?, year=?, director=?, lead=? where id=?", (title, year, director, lead, id))
+        db.commit()
+        db.close()
+
     def get_all(self):
         db = sqlite3.connect("movies.db")
         cur = db.cursor()
         cur.execute("select * from movies")
+        rows = cur.fetchall()
+        db.close()
+        return rows
+
+    def search(self, title, year, director, lead):
+        # add the wildcards for each parameter
+        title = "%" + title + "%"
+        director = "%" + director + "%"
+        lead = "%" + lead + "%"
+        db = sqlite3.connect("movies.db")
+        cur = db.cursor()
+        if year != "":
+            cur.execute("select * from movies where title like ? and year=? and director like ? and lead like ?",
+                        (title, year, director, lead))
+        else:
+            cur.execute("select * from movies where title like ? and director like ? and lead like ?",
+                        (title, director, lead))
         rows = cur.fetchall()
         db.close()
         return rows
